@@ -1,0 +1,99 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+<title>Paper Plane</title>
+
+<script src="../libs/jquery-3.3.1/jquery-3.3.1.js"></script>
+<script src="../libs/jquery-ui/jquery-ui.js"></script>
+
+<script src="../libs/three.js/three.js"></script>
+
+<script src="../libs/three.js/loaders/GLTFLoader.js"></script>
+
+<script src="../libs/three.js/loaders/inflate.min.js"></script>
+<script src="../libs/three.js/loaders/FBXLoader.js"></script>
+<script src="../libs/three.js/utils/cloneFBX.js"></script>
+
+<script src="../libs/tween.js/tween.js"></script>
+<script src="../libs/keyframe.js/keyframe.js"></script>
+
+<script src="paperPlane.js"></script>
+
+<style>
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0px;
+      border: 0;
+      overflow: hidden; 
+      display: block;  
+      font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+      background-color: rgb(233, 233, 233);
+    }
+
+    #result {
+        position: absolute;
+        color : black;
+        top: 25px;
+        left: 20px;
+    }
+
+    #score {
+        position: absolute;
+        color : black;
+        top: 25px;
+        right: 20px;
+    }
+
+    #reset {
+        top: 25px;
+        left: 640px;
+        position: absolute;
+        width: 100px;
+        height: 50px;
+        margin: auto; 
+        justify-content: center;
+        color: rgb(0, 0, 0);
+        text-align: center;
+        font-size: 1em;
+        background-color: rgb(43, 255, 0);
+    }
+
+    #reset:hover {
+        cursor: pointer;
+        background-color: rgb(34, 161, 2);
+    }
+
+    .hidden {
+        display: none;
+    }
+</style>
+
+<script type="text/javascript">
+  
+	$(document).ready(
+			function() {
+
+				var canvas = document.getElementById("webglcanvas");
+
+                createScene(canvas);
+
+		        run();
+			}
+	);
+
+</script>
+
+</head>
+<body>
+    <h1 id="result"></h1>
+    <h1 id="score">Score:0</h1>
+    <div id="reset" class="hidden">
+        <p>Play Again</p> 
+    </div>
+<div id="container">
+    <canvas id="webglcanvas"></canvas>
+</div>
+
+</html>
