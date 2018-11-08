@@ -14,9 +14,10 @@ var score = 0;
 var reset = null;
 var count = 0;
 var grass = "images/grass.jpg";
-
+var sky = "images/sky.png";
 
 var orbitControls = null;
+var mousemesh = null;
 
 async function createLand(y)
 {
@@ -28,7 +29,7 @@ async function createLand(y)
     map.repeat.set(8, 8);
 
     // Put in a ground plane to show off the lighting
-    geometry = new THREE.PlaneGeometry(25, 10, 50, 50);
+    geometry = new THREE.PlaneGeometry(100, 100, 50, 50);
     var mesh = new THREE.Mesh(geometry, new THREE.MeshPhongMaterial({color:0xffffff, map:map, side:THREE.DoubleSide}));
 
     mesh.position.set(0, y, 0);
@@ -120,12 +121,12 @@ async function createScene(canvas)
     renderer.setSize(window.innerWidth, window.innerHeight);
         
     scene = new THREE.Scene();
-    scene.background = new THREE.Color( 0xf0f0f0 );
+    scene.background = new THREE.TextureLoader().load(sky);
     
     // Camera setup
     camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 4000 );
-    camera.position.set(0, 0, 16);
-    camera.rotation.set(0,0,0)
+    camera.position.set(0, 0, 10);
+    camera.rotation.set(THREE.Math.degToRad(90), THREE.Math.degToRad(0), THREE.Math.degToRad(0));
     scene.add(camera);
 
     var light = new THREE.DirectionalLight( 0xffffff, 1 );
@@ -148,19 +149,45 @@ async function createScene(canvas)
         cube.position.set(0, 0, 1.1);
         result.text("");
     });*/
-        
+
     //document.addEventListener('keydown', onDocumentKeyDown);
-    orbitControls = new THREE.OrbitControls(camera, renderer.domElement);
+    //orbitControls = new THREE.OrbitControls(camera, renderer.domElement);
+    document.addEventListener( 'mousemove', onDocumentMouseMove );
     window.addEventListener( 'resize', onWindowResize);
 
 }
-
 
 function onWindowResize() 
 {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize( window.innerWidth, window.innerHeight );
+}
+
+function onDocumentMouseMove( event )  {
+
+    event.preventDefault();
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+
+    var vector = new THREE.Vector3(mouse.x, mouse.y, 0.5);
+	vector.unproject( camera );
+	var dir = vector.sub( camera.position ).normalize();
+	var distance = - camera.position.z / dir.z;
+    var pos = camera.position.clone().add( dir.multiplyScalar( distance ) );
+    //plane.position.x = pos.x
+   // plane.position.y = pos.y
+   // plane.position.z = pos.z
+    plane.position.copy(pos);
+}
+
+function detectCollision()
+{
+    if(planeBox && treeBox && planeBox.intersectsBox(treeBox))
+        console.log("Tree Collision");
+
+    if(planeBox && coneBox && planeBox.intersectsBox(coneBox))
+        console.log("cone Collision");
 }
 
 function run() 
@@ -203,15 +230,4 @@ function run()
     }
 
     detectCollision();
-
-}
-
-
-function detectCollision()
-{
-    if(planeBox && treeBox && planeBox.intersectsBox(treeBox))
-        console.log("Tree Collision");
-
-    if(planeBox && coneBox && planeBox.intersectsBox(coneBox))
-        console.log("cone Collision");
 }
