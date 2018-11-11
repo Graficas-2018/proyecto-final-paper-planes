@@ -32,7 +32,8 @@ async function createLand(y)
     geometry = new THREE.PlaneGeometry(100, 100, 50, 50);
     var mesh = new THREE.Mesh(geometry, new THREE.MeshPhongMaterial({color:0xffffff, map:map, side:THREE.DoubleSide}));
 
-    mesh.position.set(0, y, 0);
+    mesh.position.set(0, -4, 0);
+    mesh.rotation.set(THREE.Math.degToRad(-89), THREE.Math.degToRad(0), 0);
     
     // Add the mesh to our group
     scene.add( mesh );
@@ -51,9 +52,9 @@ async function createPlane()
         function ( object ) 
         {
             object.material = new THREE.MeshPhongMaterial({ map:0xf0f0f0});
-            object.position.set(0,0,1);
+            object.position.set(0,0,0);
             object.scale.set(20, 20, 20);
-            object.rotation.set(THREE.Math.degToRad(90), THREE.Math.degToRad(0), THREE.Math.degToRad(0));
+            object.rotation.set(THREE.Math.degToRad(0), THREE.Math.degToRad(0), THREE.Math.degToRad(0));
             scene.add(object);
             plane = object;
         },
@@ -77,7 +78,7 @@ async function createTree()
             object.material = new THREE.MeshPhongMaterial({ map:0xf0f0f0});
             object.position.set(5,0,1.8);
             object.scale.set(1, 1, 1);
-            object.rotation.set(THREE.Math.degToRad(90), THREE.Math.degToRad(0), THREE.Math.degToRad(0));
+            object.rotation.set(THREE.Math.degToRad(0), THREE.Math.degToRad(0), THREE.Math.degToRad(0));
             scene.add(object);
             tree = object;
         },
@@ -101,9 +102,9 @@ async function createcone()
         function ( object ) 
         {
             object.material = new THREE.MeshPhongMaterial({ map:coneMap});
-            object.position.set(0,0,0);
+            object.position.set(0,-2,0);
             object.scale.set(0.5, 0.5, 0.5);
-            object.rotation.set(THREE.Math.degToRad(90), THREE.Math.degToRad(0), THREE.Math.degToRad(0));
+            object.rotation.set(THREE.Math.degToRad(0), THREE.Math.degToRad(0), THREE.Math.degToRad(0));
             scene.add(object);
             cone = object;
         },
@@ -126,11 +127,11 @@ async function createScene(canvas)
     // Camera setup
     camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 4000 );
     camera.position.set(0, 0, 10);
-    camera.rotation.set(THREE.Math.degToRad(90), THREE.Math.degToRad(0), THREE.Math.degToRad(0));
+    camera.rotation.set(THREE.Math.degToRad(0), THREE.Math.degToRad(0), THREE.Math.degToRad(0));
     scene.add(camera);
 
     var light = new THREE.DirectionalLight( 0xffffff, 1 );
-    light.position.set( 1, 1, 100 );
+    light.position.set( 1, 4, 4 );
     scene.add( light );
 
     await createPlane();
@@ -184,10 +185,16 @@ function onDocumentMouseMove( event )  {
 function detectCollision()
 {
     if(planeBox && treeBox && planeBox.intersectsBox(treeBox))
+    {
         console.log("Tree Collision");
+        resetGame();
+    }
 
     if(planeBox && coneBox && planeBox.intersectsBox(coneBox))
+    {
         console.log("cone Collision");
+        resetGame();
+    }
 }
 
 function run() 
@@ -210,24 +217,45 @@ function run()
     }
     if(tree)
     {
-        tree.position.x -= 0.05; //movement
-        if(tree.position.x < -13)
+        tree.position.z += 0.05; //movement
+        if(tree.position.z > 10)
         {
-            tree.position.x = 13;
-            tree.position.y = Math.random() * 8 -4; //5 to -5
+            tree.position.z = -20;
+            tree.position.x = Math.random() * 10 -5; //5 to -5
+            updateScore();
         }
         treeBox = new THREE.Box3().setFromObject(tree);
     }
     if(cone)
     {
-        cone.position.x -= 0.02; //movement
-        if(cone.position.x < -13)
+        cone.position.z += 0.02; //movement
+        if(cone.position.z > 5)
         {
-            cone.position.x = 13;
-            cone.position.y = Math.random() * 8 -4; //5 to -5
+            cone.position.z = -20;
+            cone.position.x = Math.random() * 10 -5; //5 to -5
+            updateScore();
         }
         coneBox = new THREE.Box3().setFromObject(cone);
     }
 
     detectCollision();
+}
+
+function updateScore()
+{
+    score +=1;
+    document.getElementById("score").innerHTML = "Score:"+score;
+}
+
+function resetGame()
+{
+    score = 0;
+    document.getElementById("score").innerHTML = "Score:"+score;
+    tree.position.z = -20;
+    tree.position.x = Math.random() * 10 - 5; //5 to -5
+    cone.position.z = -20;
+    cone.position.x = Math.random() * 10 - 5; //5 to -5
+
+    
+
 }
