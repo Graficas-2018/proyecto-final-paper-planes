@@ -6,6 +6,7 @@ var plane = null, planeBox = null,
 land = null,
 cone = null, coneBox = null,
 tree = null, treeBox = null;
+var trees = [];
 var currentTime = Date.now();
 var animation = "run";
 var tag = null;
@@ -17,7 +18,6 @@ var grass = "images/grass.jpg";
 var sky = "images/sky.png";
 
 var orbitControls = null;
-var mousemesh = null;
 
 async function createLand(y)
 {
@@ -30,15 +30,15 @@ async function createLand(y)
 
     // Put in a ground plane to show off the lighting
     geometry = new THREE.PlaneGeometry(100, 100, 50, 50);
-    var mesh = new THREE.Mesh(geometry, new THREE.MeshPhongMaterial({color:0xffffff, map:map, side:THREE.DoubleSide}));
+    land = new THREE.Mesh(geometry, new THREE.MeshPhongMaterial({color:0xffffff, map:map, side:THREE.DoubleSide}));
 
-    mesh.position.set(0, -4, 0);
-    mesh.rotation.set(THREE.Math.degToRad(-89), THREE.Math.degToRad(0), 0);
+    land.position.set(0, -4, 0);
+    land.rotation.set(THREE.Math.degToRad(-89), THREE.Math.degToRad(0), 0);
     
     // Add the mesh to our group
-    scene.add( mesh );
-    mesh.castShadow = false;
-    mesh.receiveShadow = true;
+    scene.add( land );
+    land.castShadow = false;
+    land.receiveShadow = true;
 }
 
 async function createPlane()
@@ -76,11 +76,20 @@ async function createTree()
         function ( object ) 
         {
             object.material = new THREE.MeshPhongMaterial({ map:0xf0f0f0});
-            object.position.set(5,0,1.8);
             object.scale.set(1, 1, 1);
+            object.position.set(Math.floor(Math.random() * 15) + 1, 0, -20);
             object.rotation.set(THREE.Math.degToRad(0), THREE.Math.degToRad(0), THREE.Math.degToRad(0));
             scene.add(object);
-            tree = object;
+            trees.push(object);
+            for (var i = 0; i <= 10; i++)
+                {
+                    posx = Math.floor(Math.random() * 20) + 1;
+                    posx *= Math.floor(Math.random()*2) == 1 ? 1 : -1;
+                    tree = object.clone();
+                    tree.position.set(posx, 0 , -20);
+                    scene.add(tree);
+                    trees.push(tree);
+                }
         },
     // called when loading is in progresses
     function ( xhr ) { console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' ); },
@@ -115,6 +124,30 @@ async function createcone()
     );
 }
 
+function animations(obj)
+{
+    if (obj)
+    {
+        grassAnimator = new KF.KeyFrameAnimator;
+        grassAnimator.init({ 
+            interps:
+                [
+                    { 
+                        keys:[0, 1], 
+                        values:[
+                                { x : 0, y : 0 },
+                                { x : 0, y : 1 },
+                                ],
+                        target:obj.material.map.offset
+                    },
+                ],
+            loop: true,
+            duration: 1000
+        });
+        grassAnimator.start();
+    }
+}
+
 async function createScene(canvas) 
 {
     renderer = new THREE.WebGLRenderer( { canvas: canvas, antialias: true } );
@@ -137,7 +170,9 @@ async function createScene(canvas)
     await createPlane();
     await createLand(0);
     await createTree();
-    await createcone()
+    await createcone();
+
+    animations(land);
 
     /*result = $("#result");
     score_l = $("#score");
@@ -176,9 +211,6 @@ function onDocumentMouseMove( event )  {
 	var dir = vector.sub( camera.position ).normalize();
 	var distance = - camera.position.z / dir.z;
     var pos = camera.position.clone().add( dir.multiplyScalar( distance ) );
-    //plane.position.x = pos.x
-   // plane.position.y = pos.y
-   // plane.position.z = pos.z
     plane.position.copy(pos);
 }
 
@@ -187,13 +219,13 @@ function detectCollision()
     if(planeBox && treeBox && planeBox.intersectsBox(treeBox))
     {
         console.log("Tree Collision");
-        resetGame();
+        //resetGame();
     }
 
     if(planeBox && coneBox && planeBox.intersectsBox(coneBox))
     {
         console.log("cone Collision");
-        resetGame();
+        //resetGame();
     }
 }
 
@@ -215,16 +247,22 @@ function run()
     {
         planeBox = new THREE.Box3().setFromObject(plane);
     }
+
     if(tree)
     {
-        tree.position.z += 0.05; //movement
-        if(tree.position.z > 10)
+        for (let t of trees)
         {
-            tree.position.z = -20;
-            tree.position.x = Math.random() * 10 -5; //5 to -5
-            updateScore();
+            t.position.z += 0.05; //movement
+            if(t.position.z > 10)
+            {
+                posx = Math.floor(Math.random() * 20) + 1;
+                posx *= Math.floor(Math.random()*2) == 1 ? 1 : -1;
+                t.position.z = -20;
+                t.position.x = posx;
+                updateScore();
+            }
+            treeBox = new THREE.Box3().setFromObject(tree);
         }
-        treeBox = new THREE.Box3().setFromObject(tree);
     }
     if(cone)
     {
@@ -232,13 +270,14 @@ function run()
         if(cone.position.z > 5)
         {
             cone.position.z = -20;
-            cone.position.x = Math.random() * 10 -5; //5 to -5
+            cone.position.x = Math.random() * 10 -10; //5 to -5
             updateScore();
         }
         coneBox = new THREE.Box3().setFromObject(cone);
     }
 
     detectCollision();
+    console.log(trees.length);
 }
 
 function updateScore()
@@ -255,7 +294,4 @@ function resetGame()
     tree.position.x = Math.random() * 10 - 5; //5 to -5
     cone.position.z = -20;
     cone.position.x = Math.random() * 10 - 5; //5 to -5
-
-    
-
 }
