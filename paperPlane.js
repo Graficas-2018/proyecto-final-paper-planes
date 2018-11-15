@@ -51,7 +51,7 @@ async function createPlane()
     // called when resource is loaded
         function ( object ) 
         {
-            object.material = new THREE.MeshPhongMaterial({ map:0xf0f0f0});
+            object.material = new THREE.MeshPhongMaterial({ map:0xf919191});
             object.position.set(0,0,0);
             object.scale.set(20, 20, 20);
             object.rotation.set(THREE.Math.degToRad(0), THREE.Math.degToRad(0), THREE.Math.degToRad(0));
@@ -67,7 +67,11 @@ async function createPlane()
 
 async function createTree()
 {
+    var mtlLoader = new THREE.MTLLoader();
+    mtlLoader.load( "objects/lowpolytree.mtl", function( materials ) {
+    materials.preload();
     var loader = new THREE.OBJLoader();
+    loader.setMaterials(materials);
     // load a resource
     loader.load(
     // resource URL
@@ -77,11 +81,11 @@ async function createTree()
         {
             object.material = new THREE.MeshPhongMaterial({ map:0xf0f0f0});
             object.scale.set(1, 1, 1);
-            object.position.set(Math.floor(Math.random() * 15) + 1, 0, -20);
+            object.position.set(Math.floor(Math.random() * 15) + 1, -0.1, -20);
             object.rotation.set(THREE.Math.degToRad(0), THREE.Math.degToRad(0), THREE.Math.degToRad(0));
             scene.add(object);
             trees.push(object);
-            for (var i = 0; i <= 10; i++)
+            for (var i = 0; i <= 20; i++)
                 {
                     posx = Math.floor(Math.random() * 20) + 1;
                     posx *= Math.floor(Math.random()*2) == 1 ? 1 : -1;
@@ -96,23 +100,27 @@ async function createTree()
     // called when loading has errors
     function ( error ) { console.log( 'An error happened' );}
     );
+    });
 }
 
 async function createcone()
 {
     var coneMap = new THREE.TextureLoader().load("objects/Texture/TCone.png");
-
+    var mtlLoader = new THREE.MTLLoader();
+    mtlLoader.load( "objects/trafficcone.mtl", function( materials ) {
+    materials.preload();
     var loader = new THREE.OBJLoader();
+    loader.setMaterials(materials);
     // load a resource
     loader.load(
     // resource URL
-        "objects/Traffic Cone.obj",
+        "objects/trafficcone.obj",
     // called when resource is loaded
         function ( object ) 
         {
             object.material = new THREE.MeshPhongMaterial({ map:coneMap});
             object.position.set(0,-2,0);
-            object.scale.set(0.5, 0.5, 0.5);
+            object.scale.set(0.4, 0.4, 0.4);
             object.rotation.set(THREE.Math.degToRad(0), THREE.Math.degToRad(0), THREE.Math.degToRad(0));
             scene.add(object);
             cone = object;
@@ -122,6 +130,7 @@ async function createcone()
     // called when loading has errors
     function ( error ) { console.log( 'An error happened' );}
     );
+    });
 }
 
 function animations(obj)
@@ -163,8 +172,8 @@ async function createScene(canvas)
     camera.rotation.set(THREE.Math.degToRad(0), THREE.Math.degToRad(0), THREE.Math.degToRad(0));
     scene.add(camera);
 
-    var light = new THREE.DirectionalLight( 0xffffff, 1 );
-    light.position.set( 1, 4, 4 );
+    var light = new THREE.HemisphereLight( 0xffffbb, 0x080820, 1 );
+    light.position.set( 0, 15, 25 );
     scene.add( light );
 
     await createPlane();
@@ -244,26 +253,25 @@ function run()
         orbitControls.update();
 
     if(plane)
-    {
         planeBox = new THREE.Box3().setFromObject(plane);
-    }
 
-    if(tree)
+    for (let t of trees)
     {
-        for (let t of trees)
+        t.position.z += 0.1; //movement
+        if(t.position.z > 10)
         {
-            t.position.z += 0.05; //movement
-            if(t.position.z > 10)
-            {
-                posx = Math.floor(Math.random() * 20) + 1;
-                posx *= Math.floor(Math.random()*2) == 1 ? 1 : -1;
-                t.position.z = -20;
-                t.position.x = posx;
-                updateScore();
-            }
-            treeBox = new THREE.Box3().setFromObject(tree);
+            posx = Math.floor(Math.random() * 16) + 0.5;
+            posx *= Math.floor(Math.random()*2) == 1 ? 1 : -1;
+            posz = Math.floor(Math.random() * 30) + 15;
+            posz *= -1;
+            t.position.z = posz;
+            t.position.x = posx;
+            t.position.y = -0.1;
+            updateScore();
         }
+        treeBox = new THREE.Box3().setFromObject(t);
     }
+    
     if(cone)
     {
         cone.position.z += 0.02; //movement
@@ -277,7 +285,6 @@ function run()
     }
 
     detectCollision();
-    console.log(trees.length);
 }
 
 function updateScore()
