@@ -279,9 +279,20 @@ function run()
     if(orbitControls)
         orbitControls.update();
 
+    //increase spawn speed
+    if(score / 50 > 5)
+        extraTime = 0;
+    else if(score / 50 > 4)
+        extraTime = 1;
+    else if(score / 50 > 3)
+        extraTime = 2;
+    else if(score / 50 > 2)
+        extraTime = 3;
+    else if(score / 50 > 1)
+        extraTime = 4;
+
     //spawn tree check
     var index = 0;
-
     for(let t of treeMap)
     {
         if(t == false && treeSpawn[index] <= 0) //not in the map and time is 0
