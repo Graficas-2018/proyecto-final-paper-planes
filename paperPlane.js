@@ -8,6 +8,10 @@ cone = null, coneBox = null,
 tree = null;
 var treeBox = [];
 var trees = [];
+var extraTime = 5; //extra spawn time
+var minTime = 2; //min spawn time
+var treeSpawn = []; //time for the respawn
+var treeMap = []; //flag for the tree presence
 var currentTime = Date.now();
 var animation = "run";
 var tag = null;
@@ -19,6 +23,11 @@ var grass = "images/grass.jpg";
 var sky = "images/sky.png";
 
 var orbitControls = null;
+
+function spawnTime()
+{
+    return Math.random() * minTime + extraTime;
+}
 
 async function createLand(y)
 {
@@ -87,6 +96,9 @@ async function createTree()
             scene.add(object);
             trees.push(object);
             treeBox.push(new THREE.Box3().setFromObject(object));
+            treeSpawn.push(spawnTime());
+            treeMap.push(false);
+
             for (var i = 0; i <= 20; i++)
                 {
                     posx = Math.floor(Math.random() * 20) + 1;
@@ -97,6 +109,8 @@ async function createTree()
                     trees.push(tree);
                     tempCol = new THREE.Box3().setFromObject(tree)
                     treeBox.push(tempCol);
+                    treeSpawn.push(spawnTime());
+                    treeMap.push(false);
 
                 }
         },
@@ -265,24 +279,51 @@ function run()
     if(orbitControls)
         orbitControls.update();
 
+    //spawn tree check
+    var index = 0;
+
+    for(let t of treeMap)
+    {
+        if(t == false && treeSpawn[index] <= 0) //not in the map and time is 0
+        {
+            posx = Math.floor(Math.random() * 16) + 0.5;
+            posx *= Math.floor(Math.random()*2) == 1 ? 1 : -1;
+            posz = Math.floor(Math.random() * 30) + 15;
+            posz *= -1;
+            trees[index].position.z = posz;
+            trees[index].position.x = posx;
+            trees[index].position.y = -0.1;
+            treeMap[index] = true;
+        }
+
+        treeSpawn[index] = treeSpawn[index] - 0.01;
+        index = index + 1;
+    }
+
     if(plane)
         planeBox = new THREE.Box3().setFromObject(plane);
 
     //trees
-    var index = 0;
+    index = 0;
     for (let t of trees)
     {
         t.position.z += 0.1; //movement
         if(t.position.z > 10)
         {
+            /*
             posx = Math.floor(Math.random() * 16) + 0.5;
             posx *= Math.floor(Math.random()*2) == 1 ? 1 : -1;
             posz = Math.floor(Math.random() * 30) + 15;
             posz *= -1;
             t.position.z = posz;
             t.position.x = posx;
-            t.position.y = -0.1;
-            updateScore();
+            t.position.y = -0.1;*/
+            if(treeMap[index] == true)
+            {
+                updateScore();
+                treeMap[index] = false;
+                treeSpawn[index] = spawnTime();
+            }
         }
         index = index + 1;
     }
