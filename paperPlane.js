@@ -91,7 +91,7 @@ async function createTree()
         {
             object.material = new THREE.MeshPhongMaterial({ map:0xf0f0f0});
             object.scale.set(1, 1, 1);
-            object.position.set(Math.floor(Math.random() * 15) + 1, -0.1, -20);
+            object.position.set(Math.floor(Math.random() * 15) + 1, -0.1, 11);
             object.rotation.set(THREE.Math.degToRad(0), THREE.Math.degToRad(0), THREE.Math.degToRad(0));
             scene.add(object);
             trees.push(object);
@@ -104,7 +104,7 @@ async function createTree()
                     posx = Math.floor(Math.random() * 20) + 1;
                     posx *= Math.floor(Math.random()*2) == 1 ? 1 : -1;
                     tree = object.clone();
-                    tree.position.set(posx, 0 , -20);
+                    tree.position.set(posx, 0 , 11);
                     scene.add(tree);
                     trees.push(tree);
                     tempCol = new THREE.Box3().setFromObject(tree)
