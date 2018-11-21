@@ -5,7 +5,8 @@ var radius = 100, theta = 0;
 var plane = null, planeBox = null,
 land = null,
 cone = null, coneBox = null,
-tree = null, treeBox = null;
+tree = null;
+var treeBox = [];
 var trees = [];
 var currentTime = Date.now();
 var animation = "run";
@@ -85,6 +86,7 @@ async function createTree()
             object.rotation.set(THREE.Math.degToRad(0), THREE.Math.degToRad(0), THREE.Math.degToRad(0));
             scene.add(object);
             trees.push(object);
+            treeBox.push(new THREE.Box3().setFromObject(object));
             for (var i = 0; i <= 20; i++)
                 {
                     posx = Math.floor(Math.random() * 20) + 1;
@@ -93,6 +95,9 @@ async function createTree()
                     tree.position.set(posx, 0 , -20);
                     scene.add(tree);
                     trees.push(tree);
+                    tempCol = new THREE.Box3().setFromObject(tree)
+                    treeBox.push(tempCol);
+
                 }
         },
     // called when loading is in progresses
@@ -225,9 +230,17 @@ function onDocumentMouseMove( event )  {
 
 function detectCollision()
 {
-    if(planeBox && treeBox && planeBox.intersectsBox(treeBox))
+    if(planeBox && treeBox.length > 0)
     {
-        console.log("Tree Collision");
+        var index = 0;
+        for( let t of treeBox)
+        {
+            t = new THREE.Box3().setFromObject(trees[index]);
+            if (planeBox.intersectsBox(t))
+                console.log("Tree Collision");
+            index = index + 1;
+
+        }
         //resetGame();
     }
 
@@ -255,6 +268,8 @@ function run()
     if(plane)
         planeBox = new THREE.Box3().setFromObject(plane);
 
+    //trees
+    var index = 0;
     for (let t of trees)
     {
         t.position.z += 0.1; //movement
@@ -269,8 +284,9 @@ function run()
             t.position.y = -0.1;
             updateScore();
         }
-        treeBox = new THREE.Box3().setFromObject(t);
+        index = index + 1;
     }
+
     
     if(cone)
     {
