@@ -132,6 +132,8 @@ async function createAnnouncement()
 {
     var geometry = new THREE.CylinderGeometry( 0.75, 0.75, 10, 32 );
     var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+    var geometry2 = new THREE.BoxGeometry(12,4,1);
+    var material2 = new THREE.MeshBasicMaterial({color: 0x00ff00});
     var tube = new THREE.Mesh( geometry, material );
     tube.position.set(-4,-2.5,-0);
     announcements.push(tube);
@@ -139,6 +141,10 @@ async function createAnnouncement()
     tube = new THREE.Mesh( geometry, material );
     tube.position.set(4,-2.5,-0); //8 units between tubes 
     announcements.push(tube);
+    var box = new THREE.Mesh( geometry2, material2);
+    box.position.set(0,2,-0);
+    announcements.push(box);
+    scene.add(box);
     scene.add(tube);
 }
 
