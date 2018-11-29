@@ -8,6 +8,8 @@ cone = null, coneBox = null,
 tree = null;
 var treeBox = [];
 var trees = [];
+var announcements = [];
+var annBox = [];
 var extraTime = 5; //extra spawn time
 var minTime = 2; //min spawn time
 var treeSpawn = []; //time for the respawn
@@ -27,6 +29,10 @@ var orbitControls = null;
 function spawnTime()
 {
     return Math.random() * minTime + extraTime;
+}
+function firstSpawn() //just for the first time
+{
+    return Math.random() * 45 + 1;
 }
 
 async function createLand(y)
@@ -91,12 +97,12 @@ async function createTree()
         {
             object.material = new THREE.MeshPhongMaterial({ map:0xf0f0f0});
             object.scale.set(1, 1, 1);
-            object.position.set(Math.floor(Math.random() * 15) + 1, -0.1, 11);
+            object.position.set(Math.floor(Math.random() * 15) + 1, -1.5, 11);
             object.rotation.set(THREE.Math.degToRad(0), THREE.Math.degToRad(0), THREE.Math.degToRad(0));
             scene.add(object);
             trees.push(object);
             treeBox.push(new THREE.Box3().setFromObject(object));
-            treeSpawn.push(spawnTime());
+            treeSpawn.push(firstSpawn());
             treeMap.push(false);
 
             for (var i = 0; i <= 20; i++)
@@ -104,12 +110,12 @@ async function createTree()
                     posx = Math.floor(Math.random() * 20) + 1;
                     posx *= Math.floor(Math.random()*2) == 1 ? 1 : -1;
                     tree = object.clone();
-                    tree.position.set(posx, 0 , 11);
+                    tree.position.set(posx, -1.5 , 11);
                     scene.add(tree);
                     trees.push(tree);
                     tempCol = new THREE.Box3().setFromObject(tree)
                     treeBox.push(tempCol);
-                    treeSpawn.push(spawnTime());
+                    treeSpawn.push(firstSpawn());
                     treeMap.push(false);
 
                 }
@@ -121,6 +127,23 @@ async function createTree()
     );
     });
 }
+
+async function createAnnouncement()
+{
+    var geometry = new THREE.CylinderGeometry( 0.75, 0.75, 10, 32 );
+    var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+    var tube = new THREE.Mesh( geometry, material );
+    tube.position.set(-4,-2.5,-0);
+    announcements.push(tube);
+    scene.add(tube);
+    tube = new THREE.Mesh( geometry, material );
+    tube.position.set(4,-2.5,-0); //8 units between tubes 
+    announcements.push(tube);
+    scene.add(tube);
+}
+
+
+
 
 async function createcone()
 {
@@ -199,6 +222,7 @@ async function createScene(canvas)
     await createLand(0);
     await createTree();
     await createcone();
+    await createAnnouncement();
 
     animations(land);
 
@@ -303,7 +327,7 @@ function run()
             posz *= -1;
             trees[index].position.z = posz;
             trees[index].position.x = posx;
-            trees[index].position.y = -0.1;
+            //trees[index].position.y = -0.1;
             treeMap[index] = true;
         }
 
@@ -321,19 +345,11 @@ function run()
         t.position.z += 0.1; //movement
         if(t.position.z > 10)
         {
-            /*
-            posx = Math.floor(Math.random() * 16) + 0.5;
-            posx *= Math.floor(Math.random()*2) == 1 ? 1 : -1;
-            posz = Math.floor(Math.random() * 30) + 15;
-            posz *= -1;
-            t.position.z = posz;
-            t.position.x = posx;
-            t.position.y = -0.1;*/
-            if(treeMap[index] == true)
+            if(treeMap[index] == true) //if tree is in the screen
             {
                 updateScore();
-                treeMap[index] = false;
-                treeSpawn[index] = spawnTime();
+                treeMap[index] = false; //not in screen
+                treeSpawn[index] = spawnTime(); //new spawn time
             }
         }
         index = index + 1;
