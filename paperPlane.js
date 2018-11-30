@@ -16,6 +16,11 @@ var annBox = []; //
 var annSpawn = []; //time for the respawn
 var annMap = []; //flag for the presence
 
+var signs = []; //mesh
+var signBox = []; //
+var signSpawn = []; //time for the respawn
+var signMap = []; //flag for the presence
+
 var extraTime = 5; //extra spawn time
 var minTime = 2; //min spawn time
 var currentTime = Date.now();
@@ -147,8 +152,6 @@ async function createAnnouncement()
     var material2 = new THREE.MeshBasicMaterial({color: 0x00ff00});
     var tube;
     var box;
-    
-
     var xPos;
     for(var i = 0; i < 5; i++)
     {
@@ -173,13 +176,53 @@ async function createAnnouncement()
         scene.add(tube);
         var spawn = firstSpawn();
 
-        for(var j = 0; j <= 7; j++) //add the corresponding three elements 
+        for(var j = 0; j <= 3; j++) //add the corresponding three elements 
         {
             annSpawn.push(spawn);
             annMap.push(false);
         }
     }
     console.log("Announcements completed");
+}
+
+async function createSign()
+{
+    var geometry = new THREE.CylinderGeometry( 0.15, 0.15, 10, 32 );
+    var material = new THREE.MeshBasicMaterial( {color: 0x6b6b6a} ); //tube
+    var textureMap = new THREE.TextureLoader().load("./images/sign.png");
+    var material2 = new THREE.MeshPhongMaterial({ map: textureMap});
+    var geometry2 = new THREE.CubeGeometry(2, 0.1, 2);
+
+    var tube;
+    var sign;
+    var xPos;
+    for(var i = 0; i < 10; i++)
+    {
+        //character = new THREE.Mesh(geometry, material);
+        sign = new THREE.Mesh( geometry2, material2); //create the box
+        xPos = randomX();
+        sign.position.set(xPos,0,11); //position of the box
+        sign.rotation.set(Math.PI/2,0,0); //position of the box
+        signBox.push(new THREE.Box3().setFromObject(sign));
+        signs.push(sign);
+        scene.add(sign);
+
+
+        tube = new THREE.Mesh( geometry, material ); //left tube
+        tube.position.set(xPos ,-6,11); //-6 y
+        signs.push(tube);
+        signBox.push(new THREE.Box3().setFromObject(tube));
+        scene.add(tube);
+
+        var spawn = firstSpawn();
+
+        for(var j = 0; j < 2; j++) //add the corresponding three elements 
+        {
+            signSpawn.push(spawn);
+            signMap.push(false);
+        }
+    }
+    console.log("Signs completed");
 }
 
 async function createcone()
@@ -260,6 +303,7 @@ async function createScene(canvas)
     await createTree();
     await createcone();
     await createAnnouncement();
+    await createSign();
 
     animations(land);
 
@@ -305,7 +349,7 @@ function onDocumentMouseMove( event )  {
 
 function detectCollision()
 {
-    if(planeBox && treeBox.length > 0)
+    if(planeBox && treeBox.length > 0) //trees
     {
         var index = 0;
         for( let t of treeBox)
@@ -319,7 +363,7 @@ function detectCollision()
         //resetGame();
     }
 
-    if(planeBox && annBox.length > 0)
+    if(planeBox && annBox.length > 0) //announcements
     {
         var index = 0;
         for( let a of annBox)
@@ -327,6 +371,19 @@ function detectCollision()
             a = new THREE.Box3().setFromObject(announcements[index]);
             if (planeBox.intersectsBox(a))
                 console.log("Announcement Collision");
+            index = index + 1;
+        }
+        //resetGame();
+    }
+
+    if(planeBox && signBox.length > 0) //signs
+    {
+        var index = 0;
+        for( let a of signBox)
+        {
+            a = new THREE.Box3().setFromObject(signs[index]);
+            if (planeBox.intersectsBox(a))
+                console.log("Sign Collision");
             index = index + 1;
         }
         //resetGame();
@@ -417,6 +474,30 @@ function run()
         annSpawn[a] = annSpawn[a] - 0.01;
     }
 
+    //signs' spawn check
+    index = 0;
+    for(var a = 0; a < signs.length; a++)
+    {
+        if(signMap[a] == false && signSpawn[index] <= 0 && (a % 2) == 0) //not in the map and time is 0
+        {
+            posx = Math.floor(Math.random() * 16) + 0.5;
+            posx *= Math.floor(Math.random()*2) == 1 ? 1 : -1;
+            posz = Math.floor(Math.random() * 30) + 15;
+            posz *= -1;
+
+            //three parts for just one obstacle
+            signs[a].position.z = posz;
+            signs[a].position.x = posx;
+            signMap[a] = true;
+
+
+            signs[a+1].position.z = posz;
+            signs[a+1].position.x = posx;
+            signMap[a+1] = true;
+        }
+        signSpawn[a] = signSpawn[a] - 0.01;
+    }
+
     //announcements
     for(var a = 0; a < announcements.length; a++)
     {
@@ -434,6 +515,22 @@ function run()
             annMap[a+2] = false; //not in screen
             annSpawn[a+2] = spawn; //new spawn time
 
+        }
+    }
+
+    //signs
+    for(var a = 0; a < signs.length; a++)
+    {
+        signs[a].position.z += 0.1; //movement
+        if( signs[a].position.z > 10 && signMap[a] == true && (a % 2) == 0) //if announcement is in the screen and is the first piece
+        {
+            updateScore();
+            var spawn = spawnTime();
+            signMap[a] = false; //not in screen
+            signSpawn[a] = spawn; //new spawn time
+
+            signMap[a+1] = false; //not in screen
+            signSpawn[a+1] = spawn //new spawn time
         }
     }
 
