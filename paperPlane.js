@@ -150,7 +150,7 @@ async function createAnnouncement()
     
 
     var xPos;
-    for(var i = 0; i < 2; i++)
+    for(var i = 0; i < 5; i++)
     {
         box = new THREE.Mesh( geometry2, material2); //create the box
         xPos = randomX();
@@ -173,7 +173,7 @@ async function createAnnouncement()
         scene.add(tube);
         var spawn = firstSpawn();
 
-        for(var j = 0; j <= 2; j++) //add the corresponding three elements 
+        for(var j = 0; j <= 7; j++) //add the corresponding three elements 
         {
             annSpawn.push(spawn);
             annMap.push(false);
@@ -315,6 +315,19 @@ function detectCollision()
                 console.log("Tree Collision");
             index = index + 1;
 
+        }
+        //resetGame();
+    }
+
+    if(planeBox && annBox.length > 0)
+    {
+        var index = 0;
+        for( let a of annBox)
+        {
+            a = new THREE.Box3().setFromObject(announcements[index]);
+            if (planeBox.intersectsBox(a))
+                console.log("Announcement Collision");
+            index = index + 1;
         }
         //resetGame();
     }
