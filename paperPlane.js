@@ -150,7 +150,7 @@ async function createAnnouncement()
     
 
     var xPos;
-    for(var i = 0; i < 5; i++)
+    for(var i = 0; i < 2; i++)
     {
         box = new THREE.Mesh( geometry2, material2); //create the box
         xPos = randomX();
@@ -378,7 +378,7 @@ function run()
     index = 0;
     for(var a = 0; a < announcements.length; a++)
     {
-        if(annMap[a] == false && annSpawn[index] <= 0) //not in the map and time is 0
+        if(annMap[a] == false && annSpawn[index] <= 0 && (a % 3) == 0) //not in the map and time is 0
         {
             posx = Math.floor(Math.random() * 16) + 0.5;
             posx *= Math.floor(Math.random()*2) == 1 ? 1 : -1;
@@ -389,19 +389,19 @@ function run()
             announcements[a].position.z = posz;
             announcements[a].position.x = posx;
             annMap[a] = true;
-            a =+ 1;
 
-            announcements[a].position.z = posz;
-            announcements[a].position.x = posx-4;
-            annMap[a] = true;
-            a =+ 1;
 
-            announcements[a].position.z = posz;
-            announcements[a].position.x = posx+4;
-            annMap[a] = true; 
+            announcements[a+1].position.z = posz;
+            announcements[a+1].position.x = posx-4;
+            annMap[a+1] = true;
+
+
+            announcements[a+2].position.z = posz;
+            announcements[a+2].position.x = posx+4;
+            annMap[a+2] = true; 
+
         }
-        else
-            annSpawn[a] = annSpawn[a] - 0.01;
+        annSpawn[a] = annSpawn[a] - 0.01;
     }
 
     //announcements
@@ -414,14 +414,12 @@ function run()
             var spawn = spawnTime();
             annMap[a] = false; //not in screen
             annSpawn[a] = spawn; //new spawn time
-            a=+1;
 
-            annMap[a] = false; //not in screen
-            annSpawn[a] = spawn //new spawn time
-            a=+1;
+            annMap[a+1] = false; //not in screen
+            annSpawn[a+1] = spawn //new spawn time
 
-            annMap[a] = false; //not in screen
-            annSpawn[a] = spawn; //new spawn time
+            annMap[a+2] = false; //not in screen
+            annSpawn[a+2] = spawn; //new spawn time
 
         }
     }
