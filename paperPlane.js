@@ -8,12 +8,16 @@ cone = null, coneBox = null,
 tree = null;
 var treeBox = [];
 var trees = [];
-var announcements = [];
-var annBox = [];
-var extraTime = 5; //extra spawn time
-var minTime = 2; //min spawn time
 var treeSpawn = []; //time for the respawn
 var treeMap = []; //flag for the tree presence
+
+var announcements = []; //mesh
+var annBox = []; //
+var annSpawn = []; //time for the respawn
+var annMap = []; //flag for the presence
+
+var extraTime = 5; //extra spawn time
+var minTime = 2; //min spawn time
 var currentTime = Date.now();
 var animation = "run";
 var tag = null;
@@ -33,6 +37,13 @@ function spawnTime()
 function firstSpawn() //just for the first time
 {
     return Math.random() * 45 + 1;
+}
+function randomX()
+{
+    var posx;
+    posx = Math.floor(Math.random() * 20) + 1;
+    posx *= Math.floor(Math.random()*2) == 1 ? 1 : -1;
+    return posx;
 }
 
 async function createLand(y)
@@ -134,22 +145,42 @@ async function createAnnouncement()
     var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
     var geometry2 = new THREE.BoxGeometry(12,4,2);
     var material2 = new THREE.MeshBasicMaterial({color: 0x00ff00});
-    var tube = new THREE.Mesh( geometry, material );
-    tube.position.set(-4,-2.5,-5);
-    announcements.push(tube);
-    scene.add(tube);
-    tube = new THREE.Mesh( geometry, material );
-    tube.position.set(4,-2.5,-5); //8 units between tubes 
-    announcements.push(tube);
-    var box = new THREE.Mesh( geometry2, material2);
-    box.position.set(0,2,-5);
-    announcements.push(box);
-    scene.add(box);
-    scene.add(tube);
+    var tube;
+    var box;
+    
+
+    var xPos;
+    for(var i = 0; i < 5; i++)
+    {
+        box = new THREE.Mesh( geometry2, material2); //create the box
+        xPos = randomX();
+        box.position.set(xPos,2,11); //position of the box
+        annBox.push(new THREE.Box3().setFromObject(box));
+        announcements.push(box);
+        scene.add(box);
+
+
+        tube = new THREE.Mesh( geometry, material ); //left tube
+        tube.position.set(xPos-4 ,-2.5,11); //alway -4 to the center
+        announcements.push(tube);
+        annBox.push(new THREE.Box3().setFromObject(tube));
+        scene.add(tube);
+
+        tube = new THREE.Mesh( geometry, material ); //right tube
+        tube.position.set(xPos+4 ,-2.5,11); //alway +4 to the center
+        announcements.push(tube);
+        annBox.push(new THREE.Box3().setFromObject(tube));
+        scene.add(tube);
+        var spawn = firstSpawn();
+
+        for(var j = 0; j <= 2; j++) //add the corresponding three elements 
+        {
+            annSpawn.push(spawn);
+            annMap.push(false);
+        }
+    }
+    console.log("Announcements completed");
 }
-
-
-
 
 async function createcone()
 {
@@ -309,6 +340,9 @@ function run()
     if(orbitControls)
         orbitControls.update();
 
+    if(plane) //plane's collider
+        planeBox = new THREE.Box3().setFromObject(plane);
+
     //increase spawn speed
     if(score / 50 > 5)
         extraTime = 0;
@@ -333,7 +367,6 @@ function run()
             posz *= -1;
             trees[index].position.z = posz;
             trees[index].position.x = posx;
-            //trees[index].position.y = -0.1;
             treeMap[index] = true;
         }
 
@@ -341,8 +374,57 @@ function run()
         index = index + 1;
     }
 
-    if(plane)
-        planeBox = new THREE.Box3().setFromObject(plane);
+    //announcements' spawn check
+    index = 0;
+    for(var a = 0; a < announcements.length; a++)
+    {
+        if(annMap[a] == false && annSpawn[index] <= 0) //not in the map and time is 0
+        {
+            posx = Math.floor(Math.random() * 16) + 0.5;
+            posx *= Math.floor(Math.random()*2) == 1 ? 1 : -1;
+            posz = Math.floor(Math.random() * 30) + 15;
+            posz *= -1;
+
+            //three parts for just one obstacle
+            announcements[a].position.z = posz;
+            announcements[a].position.x = posx;
+            annMap[a] = true;
+            a =+ 1;
+
+            announcements[a].position.z = posz;
+            announcements[a].position.x = posx-4;
+            annMap[a] = true;
+            a =+ 1;
+
+            announcements[a].position.z = posz;
+            announcements[a].position.x = posx+4;
+            annMap[a] = true; 
+        }
+        else
+            annSpawn[a] = annSpawn[a] - 0.01;
+    }
+
+    //announcements
+    for(var a = 0; a < announcements.length; a++)
+    {
+        announcements[a].position.z += 0.1; //movement
+        if( announcements[a].position.z > 10 && annMap[a] == true && (a % 3) == 0) //if announcement is in the screen and is the first piece
+        {
+            updateScore();
+            var spawn = spawnTime();
+            annMap[a] = false; //not in screen
+            annSpawn[a] = spawn; //new spawn time
+            a=+1;
+
+            annMap[a] = false; //not in screen
+            annSpawn[a] = spawn //new spawn time
+            a=+1;
+
+            annMap[a] = false; //not in screen
+            annSpawn[a] = spawn; //new spawn time
+
+        }
+    }
 
     //trees
     index = 0;
