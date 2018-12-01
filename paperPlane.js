@@ -32,6 +32,9 @@ var reset = null;
 var count = 0;
 var grass = "images/grass.jpg";
 var sky = "images/sky.png";
+var post = "images/post.jpg"
+var speed = 0.1
+var start = false;
 
 var orbitControls = null;
 
@@ -112,8 +115,8 @@ async function createTree()
         function ( object ) 
         {
             object.material = new THREE.MeshPhongMaterial({ map:0xf0f0f0});
-            object.scale.set(1, 1, 1);
-            object.position.set(Math.floor(Math.random() * 15) + 1, -1.5, 11);
+            object.scale.set(1.2, 1.2, 1.2);
+            object.position.set(Math.floor(Math.random() * 15) + 1, -1, 11);
             object.rotation.set(THREE.Math.degToRad(0), THREE.Math.degToRad(0), THREE.Math.degToRad(0));
             scene.add(object);
             trees.push(object);
@@ -146,14 +149,17 @@ async function createTree()
 
 async function createAnnouncement()
 {
+    var postmap = new THREE.TextureLoader().load(post);
+    postmap.wrapS = postmap.wrapT = THREE.RepeatWrapping;
+    postmap.repeat.set(1,1);
     var geometry = new THREE.CylinderGeometry( 0.75, 0.75, 10, 32 );
-    var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+    var material = new THREE.MeshPhongMaterial( {color: 0x606060, map:postmap} );
     var geometry2 = new THREE.BoxGeometry(12,4,2);
-    var material2 = new THREE.MeshBasicMaterial({color: 0x00ff00});
+    var material2 = new THREE.MeshBasicMaterial({color: 0xbfb663});
     var tube;
     var box;
     var xPos;
-    for(var i = 0; i < 5; i++)
+    for(var i = 0; i < 3; i++)
     {
         box = new THREE.Mesh( geometry2, material2); //create the box
         xPos = randomX();
@@ -162,15 +168,14 @@ async function createAnnouncement()
         announcements.push(box);
         scene.add(box);
 
-
         tube = new THREE.Mesh( geometry, material ); //left tube
-        tube.position.set(xPos-4 ,-2.5,11); //alway -4 to the center
+        tube.position.set(xPos-4 ,-2.5,11); //always -4 to the center
         announcements.push(tube);
         annBox.push(new THREE.Box3().setFromObject(tube));
         scene.add(tube);
 
         tube = new THREE.Mesh( geometry, material ); //right tube
-        tube.position.set(xPos+4 ,-2.5,11); //alway +4 to the center
+        tube.position.set(xPos+4 ,-2.5,11); //always +4 to the center
         announcements.push(tube);
         annBox.push(new THREE.Box3().setFromObject(tube));
         scene.add(tube);
@@ -187,16 +192,19 @@ async function createAnnouncement()
 
 async function createSign()
 {
+    var postmap2 = new THREE.TextureLoader().load(post);
+    postmap2.wrapS = postmap2.wrapT = THREE.RepeatWrapping;
+    postmap2.repeat.set(1,1);
     var geometry = new THREE.CylinderGeometry( 0.15, 0.15, 10, 32 );
-    var material = new THREE.MeshBasicMaterial( {color: 0x6b6b6a} ); //tube
+    var material = new THREE.MeshBasicMaterial( {color: 0x6b6b6a, map:postmap2} ); //tube
     var textureMap = new THREE.TextureLoader().load("./images/sign.png");
-    var material2 = new THREE.MeshPhongMaterial({ map: textureMap});
+    var material2 = new THREE.MeshPhongMaterial({ color: 0xededed, map: textureMap});
     var geometry2 = new THREE.CubeGeometry(2, 0.1, 2);
 
     var tube;
     var sign;
     var xPos;
-    for(var i = 0; i < 10; i++)
+    for(var i = 0; i < 8; i++)
     {
         //character = new THREE.Mesh(geometry, material);
         sign = new THREE.Mesh( geometry2, material2); //create the box
@@ -225,7 +233,7 @@ async function createSign()
     console.log("Signs completed");
 }
 
-async function createcone()
+/*async function createcone()
 {
     var coneMap = new THREE.TextureLoader().load("objects/Texture/TCone.png");
     var mtlLoader = new THREE.MTLLoader();
@@ -254,7 +262,7 @@ async function createcone()
     );
     });
 }
-
+*/
 function animations(obj)
 {
     if (obj)
@@ -273,7 +281,7 @@ function animations(obj)
                     },
                 ],
             loop: true,
-            duration: 1000
+            duration: 900
         });
         grassAnimator.start();
     }
@@ -301,23 +309,33 @@ async function createScene(canvas)
     await createPlane();
     await createLand(0);
     await createTree();
-    await createcone();
+   // await createcone();
     await createAnnouncement();
     await createSign();
 
     animations(land);
 
-    /*result = $("#result");
     score_l = $("#score");
     reset = $("#reset");
+    startB = $("#start");
+    title = $("#title");
+
+    startB.removeClass("hidden");
+    title.removeClass("hidden");
+
+    $("#start").click(() =>{
+        start = true;
+        score = 0;
+        startB.addClass("hidden");
+        title.addClass("hidden");
+        score_l.text("Score:0");
+    });
+
     $("#reset").click(() =>{
         score = 0;
         reset.addClass("hidden");
         score_l.text("Score:0");
-        scene.add(cube);
-        cube.position.set(0, 0, 1.1);
-        result.text("");
-    });*/
+    });
 
     //document.addEventListener('keydown', onDocumentKeyDown);
     //orbitControls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -389,11 +407,11 @@ function detectCollision()
         //resetGame();
     }
 
-    if(planeBox && coneBox && planeBox.intersectsBox(coneBox))
+    /*if(planeBox && coneBox && planeBox.intersectsBox(coneBox))
     {
         console.log("cone Collision");
         //resetGame();
-    }
+    }*/
 }
 
 function run() 
@@ -407,8 +425,11 @@ function run()
 
     KF.update();
 
+    if(start)
+    {
+
     if(orbitControls)
-        orbitControls.update();
+    orbitControls.update();
 
     if(plane) //plane's collider
         planeBox = new THREE.Box3().setFromObject(plane);
@@ -424,6 +445,9 @@ function run()
         extraTime = 3;
     else if(score / 50 > 1)
         extraTime = 4;
+    
+    if (score != 0 && score % 10 == 0)
+        speed += 0.0001;
 
     //spawn tree check
     var index = 0;
@@ -501,7 +525,7 @@ function run()
     //announcements
     for(var a = 0; a < announcements.length; a++)
     {
-        announcements[a].position.z += 0.1; //movement
+        announcements[a].position.z += speed; //movement
         if( announcements[a].position.z > 10 && annMap[a] == true && (a % 3) == 0) //if announcement is in the screen and is the first piece
         {
             updateScore();
@@ -521,7 +545,7 @@ function run()
     //signs
     for(var a = 0; a < signs.length; a++)
     {
-        signs[a].position.z += 0.1; //movement
+        signs[a].position.z += speed; //movement
         if( signs[a].position.z > 10 && signMap[a] == true && (a % 2) == 0) //if announcement is in the screen and is the first piece
         {
             updateScore();
@@ -538,7 +562,7 @@ function run()
     index = 0;
     for (let t of trees)
     {
-        t.position.z += 0.1; //movement
+        t.position.z += speed; //movement
         if(t.position.z > 10)
         {
             if(treeMap[index] == true) //if tree is in the screen
@@ -550,9 +574,8 @@ function run()
         }
         index = index + 1;
     }
-
     
-    if(cone)
+    /*if(cone)
     {
         cone.position.z += 0.02; //movement
         if(cone.position.z > 5)
@@ -562,9 +585,11 @@ function run()
             updateScore();
         }
         coneBox = new THREE.Box3().setFromObject(cone);
-    }
+    }*/
 
     detectCollision();
+
+    }
 }
 
 function updateScore()
@@ -579,6 +604,6 @@ function resetGame()
     document.getElementById("score").innerHTML = "Score:"+score;
     tree.position.z = -20;
     tree.position.x = Math.random() * 10 - 5; //5 to -5
-    cone.position.z = -20;
-    cone.position.x = Math.random() * 10 - 5; //5 to -5
+    //cone.position.z = -20;
+    //cone.position.x = Math.random() * 10 - 5; //5 to -5
 }
