@@ -21,7 +21,7 @@ var signBox = []; //
 var signSpawn = []; //time for the respawn
 var signMap = []; //flag for the presence
 
-var extraTime = 5; //extra spawn time
+var extraTime = 25; //extra spawn time
 var minTime = 2; //min spawn time
 var currentTime = Date.now();
 var animation = "run";
@@ -438,13 +438,13 @@ function run()
     if(score / 50 > 5)
         extraTime = 0;
     else if(score / 50 > 4)
-        extraTime = 1;
+        extraTime = 5;
     else if(score / 50 > 3)
-        extraTime = 2;
+        extraTime = 10;
     else if(score / 50 > 2)
-        extraTime = 3;
+        extraTime = 15;
     else if(score / 50 > 1)
-        extraTime = 4;
+        extraTime = 20;
     
     if (score != 0 && score % 10 == 0)
         speed += 0.0001;
