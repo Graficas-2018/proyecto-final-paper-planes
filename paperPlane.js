@@ -476,7 +476,7 @@ function run()
         {
             posx = Math.floor(Math.random() * 16) + 0.5;
             posx *= Math.floor(Math.random()*2) == 1 ? 1 : -1;
-            posz = Math.floor(Math.random() * 30) + 15;
+            posz = Math.floor(Math.random() * 30) + 50;
             posz *= -1;
 
             //three parts for just one obstacle
@@ -506,7 +506,7 @@ function run()
         {
             posx = Math.floor(Math.random() * 16) + 0.5;
             posx *= Math.floor(Math.random()*2) == 1 ? 1 : -1;
-            posz = Math.floor(Math.random() * 30) + 15;
+            posz = Math.floor(Math.random() * 30) + 50;
             posz *= -1;
 
             //three parts for just one obstacle
