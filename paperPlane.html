@@ -43,16 +43,30 @@
         right: 20px;
     }
 
+    #stamina {
+        position: absolute;
+        color : black;
+        top: 55px;
+        right: 20px;
+    }
+
     #title {
         position: absolute;
         color : black;
         top: 25px;
-        right: 600px;
+        right: 42%;
+    }
+
+    #result {
+        position: absolute;
+        color : black;
+        top: 25px;
+        left: 42%;
     }
 
     #reset {
         top: 25px;
-        left: 640px;
+        left: 25px;
         position: absolute;
         width: 100px;
         height: 50px;
@@ -111,15 +125,13 @@
 </head>
 <body>
     <h1 id="score">Score:0</h1>
-    
+    <h1 id="stamina">Stamina:100</h1>
+    <h1 id="title" class="hidden">PAPER PLANES</h1>
+    <h1 id="result"></h1>
 <div id="container">
     <canvas id="webglcanvas"></canvas>
-    <h1 id="title" class="hidden">PAPER PLANES</h1>
-    <div id="start" class="hidden">
-        <p>Start!</p> 
-    <div id="reset" class="hidden">
-        <p>Play Again</p> 
-    </div>
+    <div id="start" class="hidden"><p>Start!</p></div>
+    <div id="reset" class="hidden"><p>Play Again</p> </div>
 </div>
 
 </html>
